@@ -1,29 +1,32 @@
 #!/bin/bash
-if [[ $# -eq 2 ]]; then
-    corrupt=`sqlite3 "$1" "PRAGMA integrity_check;"`
-    if [[ $corrupt -ne "ok" ]]; then
+aup3_name=`sed 's/\.aup3//' <<< "$1"`
+echo "${aup3_name}"
+if [[ $# -eq 1 ]]; then
+    corrupt=`sqlite3 "${aup3_name}.aup3" "PRAGMA integrity_check;"`
+    if [[ "$corrupt" != "ok" ]]; then
         # rebuild sqlite3 db
-        ver=`sqlite3 "$1" "select sqlite_version();"`
-                echo "Version: $ver\n$corrupt"
-        if [[ "3.22.0" -gt "$ver" ]]; then
-            sqlite3 "$1" ".dump" > "$1.sql"
+        ver=$(sed 's/\.[0-9]$//' <<< `sqlite3 "${aup3_name}.aup3" "select sqlite_version();"`)
+                echo -e "Version: ${ver}\n${corrupt}"
+        if [[ 3.29 > $ver ]]; then
+            sqlite3 "${aup3_name}.aup3" ".dump" > "${aup3_name}.sql"
         else
-            sqlite3 "$1" ".recover" > "$1.sql"
+            sqlite3 "${aup3_name}.aup3" ".recover" > "${aup3_name}.sql"
         fi
-        sed -i '/BEGIN TRANSACTION/d;/ROLLBACK/d' "$1.sql" 
-        sqlite3 "$1_rebuilt.aup3" < "$1.sql"
+        echo "sed part"
+        sed -i '/BEGIN TRANSACTION/d;/ROLLBACK/d' "${aup3_name}.sql" 
+        sqlite3 "${aup3_name}_rebuilt.aup3" < "${aup3_name}.sql"
         if [[ $? -eq 0 ]]; then
-            rm "$1.sql"
+            rm "${aup3_name}.sql"
         else
             echo "Trouble with that sql."	
             exit 1
         fi
-        aup3_input_name="$1_rebuilt.aup3"	        
+        aup3_input_name="${aup3_name}_rebuilt.aup3"	        
     else
-        aup3_input_name="$1"
+        aup3_input_name="${aup3_name}.aup3"
     fi
-    aup3_output_name=`sed 's/\.aup3//' <<< "$1"`
-    aup3toraw -i "$aup3_input_name" -o "$aup3_output_name"
+    echo "$aup3_input_name" "${aup3_name}.raw"
+    ./aup3toraw -i "$aup3_input_name" -o "${aup3_name}.raw"
 else
     echo "Usage: aup3toraw.sh [aup3 filename]"
 fi
