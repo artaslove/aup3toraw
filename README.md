@@ -1,5 +1,5 @@
 # aup3toraw
-AUP3 Audacity project to 32bit RAW audio convertor
+AUP3 Audacity project to 32bit float RAW audio convertor
 
 Python 3.8+
 Requires sqlite3, argparse
