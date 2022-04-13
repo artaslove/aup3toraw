@@ -29,7 +29,7 @@ cur = con.cursor()
 query = con.execute("PRAGMA integrity_check;")
 corruption_check = query.fetchone()[0]
 if corruption_check != "ok":
-    contmp = sqlite3.connect(':memory')
+    contmp = sqlite3.connect(':memory:')
     cur = contmp.cursor()
     for line in con.iterdump():  # our version that gives all errors a pass
         cur.execute(line)
