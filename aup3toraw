@@ -2,6 +2,7 @@
 
 import sqlite3
 import argparse
+from sqlite_dump import iterdump
 
 def init_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -31,7 +32,7 @@ corruption_check = query.fetchone()[0]
 if corruption_check != "ok":
     contmp = sqlite3.connect(':memory:')
     cur = contmp.cursor()
-    for line in con.iterdump():  # our version that gives all errors a pass
+    for line in con.iterdump(): 
         cur.execute(line)
     contmp.commit()
     
