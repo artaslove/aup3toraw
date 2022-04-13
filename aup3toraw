@@ -2,6 +2,13 @@
 
 import sqlite3
 import argparse
+#from unittest.mock import patch
+     
+#@patch.object(
+#    sqlite3,  # object whose attribute I want to patch
+#    'iterdump',  # the attribute name I want to patch
+#    Mock(return_value={'time_to_respond': timedelta(minutes=1, seconds=3)})  # replacement for the patched attribute
+#)
 
 def init_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -26,9 +33,20 @@ parser = init_argparse()
 args = parser.parse_args()
 con = sqlite3.connect(args.input)
 cur = con.cursor()
+query = con.execute("PRAGMA integrity_check;")
+corruption_check = query.fetchone()[0]
+if corruption_check != "ok":
+    contmp = sqlite3.connect(':memory')
+    cur = contmp.cursor()
+    for line in con.iterdump():  # our version that gives all errors a pass
+        cur.execute(line)
+    contmp.commit()
+    
+    # that's all folks!	
+       
 for sample in cur.execute("SELECT samples from sampleblocks;"):
-    with open(args.output, 'ab') as file:
-        file.write(sample[0])
+    with open(args.output, 'ab') as f:
+        f.write(sample[0])
 con.close();
 
 
