@@ -2,13 +2,6 @@
 
 import sqlite3
 import argparse
-#from unittest.mock import patch
-     
-#@patch.object(
-#    sqlite3,  # object whose attribute I want to patch
-#    'iterdump',  # the attribute name I want to patch
-#    Mock(return_value={'time_to_respond': timedelta(minutes=1, seconds=3)})  # replacement for the patched attribute
-#)
 
 def init_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
